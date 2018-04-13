@@ -1,0 +1,14 @@
+;
+; BIND data file for local loopback interface
+;
+$TTL	500
+@	IN	SOA	test.3fs.si. root.localhost. (
+			      1		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 500 )	; Negative Cache TTL
+;
+@	IN	NS	localhost.
+@	IN	A	178.62.252.50
+www	IN	CNAME	@
