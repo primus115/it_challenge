@@ -94,7 +94,7 @@ sudo apt-get update
 sudo apt-get install -y ansible
 ```
 
-Na konec datoteke [/etc/ansible/host](./ansible/host) dodamo serverje katere želimo konfigurirati.
+Na konec datoteke [/etc/ansible/hosts](./ansible/host) dodamo serverje katere želimo konfigurirati.
 ```shell
 server_3fs ansible_port=22 ansible_host=37.139.28.164 ansible_ssh_user=primoz
 ```
@@ -122,7 +122,7 @@ Ustvarimo potrebno strukturo map in v datoteko [/etc/ansible/roles/ntp/tasks/mai
 - name: restart-ntp
   service: name=ntp state=restarted enabled=yes
 ```
-Nova konfiguracija, ki se kopira na strežnik je definirana [tule](config/ntp.conf).
+Nova konfiguracija, ki se kopira na strežnik je definirana [tule](./ansible/config/ntp.conf).
 
 
 Za definicije okoli sshd-ja pa ustvarimo drugo datoteko: [/etc/ansible/roles/ssh/tasks/main.yml](./ansible/roles/ssh/tasks/main.yml)
@@ -147,7 +147,7 @@ Za definicije okoli sshd-ja pa ustvarimo drugo datoteko: [/etc/ansible/roles/ssh
 ```
 
 
-Sedaj ustvarimo še [/etc/ansible/playbook/playbook.yml](./ansible/playbook/playbook.yml), v katerem definiramo kater strežnik in katere prej definirane role bomo uporabili:
+Sedaj ustvarimo še [/etc/ansible/playbook/playbook.yml](./ansible/playbook.yml), v katerem definiramo kater strežnik in katere prej definirane role bomo uporabili:
 ```shell
 - hosts: server_3fs
   become: true #root
