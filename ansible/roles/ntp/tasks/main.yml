@@ -1,0 +1,18 @@
+- name: Installing ntp
+  apt: pkg=ntp state=present
+#  notify: 
+#  - copy-config
+
+- name: copy-config
+  copy: 
+    src: config/ntp.conf
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+#  notify:
+#  - restart-ntp
+
+- name: restart-ntp
+  service: name=ntp state=restarted enabled=yes

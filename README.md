@@ -80,5 +80,93 @@ na koncu naredimo še restart bind9:
 ```shell
 sudo systemctl restart bind9.service
 ```
-# dodaj drop in shrani!!!
 
+## 4. Ansible - server configuration
+Izberi si poljuben configuration management tool (puppet, ansible, salt, …) in z njim:
+- namesti ntp streznik, ki bo uporabljal slovenske ntp streznike.
+- nastavi ssh streznik, da bo dovoljeval prijavo samo s nasimi SSH kljuci
+
+### Postopek:
+Nameščanje ansible orodja na računalnik iz katerega bomo izvajali konfiguracije:
+```shell
+sudo apt-add-repository -y ppa:ansible/ansible
+sudo apt-get update
+sudo apt-get install -y ansible
+```
+
+Na konec datoteke [/etc/ansible/host](./ansible/host) dodamo serverje katere želimo konfigurirati.
+```shell
+server_3fs ansible_port=22 ansible_host=37.139.28.164 ansible_ssh_user=primoz
+```
+
+Naloge sem razdelil na "taske" definirane v "roles", kateri se kličejo v "playbook"-u.
+Ustvarimo potrebno strukturo map in v datoteko [/etc/ansible/roles/ntp/tasks/main.yml](./ansible/roles/ntp/tasks/main.yml) dodamo potrebne definicije:
+
+```shell
+- name: Installing ntp
+  apt: pkg=ntp state=present
+#  notify: 
+#  - copy-config
+
+- name: copy-config
+  copy:
+    src: config/ntp.conf
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+#  notify:
+#  - restart-ntp
+
+- name: restart-ntp
+  service: name=ntp state=restarted enabled=yes
+```
+Nova konfiguracija, ki se kopira na strežnik je definirana [tule](config/ntp.conf).
+
+
+Za definicije okoli sshd-ja pa ustvarimo drugo datoteko: [/etc/ansible/roles/ssh/tasks/main.yml](./ansible/roles/ssh/tasks/main.yml)
+```shell
+- name: Restrict SSH logins to keys only
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+
+- name: Restrict SSH logins to keys only regex2
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: absent
+    regexp: '^#PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+
+
+- name: Restart sshd
+  service: name=sshd state=restarted enabled=yes
+```
+
+
+Sedaj ustvarimo še [/etc/ansible/playbook/playbook.yml](./ansible/playbook/playbook.yml), v katerem definiramo kater strežnik in katere prej definirane role bomo uporabili:
+```shell
+- hosts: server_3fs
+  become: true #root
+  roles:
+  - ntp
+  - ssh
+```
+
+Playbook poženemo z ukazom:
+```shell
+ansible-playbook -K playbook.yml
+```
+
+Na koncu lahko še preverimo delovnje ntp-ja:
+```shell
+ansible -m shell -a "ntpq -p;date" server_3fs
+```
+
+
+TODO:
+# dodaj drop in shrani!!!
+preveri dns ker z dropom neha delovati

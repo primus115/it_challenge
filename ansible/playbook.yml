@@ -1,0 +1,5 @@
+- hosts: server_3fs
+  become: true #root
+  roles:
+  - ntp
+  - ssh

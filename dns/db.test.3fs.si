@@ -10,5 +10,5 @@ $TTL	500
 			 500 )	; Negative Cache TTL
 ;
 @	IN	NS	localhost.
-@	IN	A	178.62.252.50
+@	IN	A	37.139.28.164
 www	IN	CNAME	@
