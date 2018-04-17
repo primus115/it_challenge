@@ -94,7 +94,7 @@ sudo apt-get update
 sudo apt-get install -y ansible
 ```
 
-Na konec datoteke [/etc/ansible/hosts](./ansible/host) dodamo serverje katere želimo konfigurirati.
+Na konec datoteke [/etc/ansible/hosts](./ansible/hosts) dodamo serverje katere želimo konfigurirati.
 ```shell
 server_3fs ansible_port=22 ansible_host=37.139.28.164 ansible_ssh_user=primoz
 ```
