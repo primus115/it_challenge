@@ -145,6 +145,7 @@ Za definicije okoli sshd-ja pa ustvarimo drugo datoteko: [/etc/ansible/roles/ssh
 - name: Restart sshd
   service: name=sshd state=restarted enabled=yes
 ```
+Preden zaganjamo playbook, ne pozabimo kopirati svoj public key na strežnik!
 
 
 Sedaj ustvarimo še [/etc/ansible/playbook/playbook.yml](./ansible/playbook.yml), v katerem definiramo kater strežnik in katere prej definirane role bomo uporabili:
@@ -166,7 +167,64 @@ Na koncu lahko še preverimo delovnje ntp-ja:
 ansible -m shell -a "ntpq -p;date" server_3fs
 ```
 
+## 5. Docker
+Pripravi 2 docker containerja (z Dockerfile in docker-compose.yml):
+1. container naj ima postavljen Apache Cassandra 3.11
+2. container naj ima nginx z mini go aplikacijo, ki:
+	- se poveze na cassandra 
+	- naredi keyspace `projekt1`, ce le ta ne obstaja
+	- naredi v keyspaceu tabelo `test`, ce le ta ne obstaja, ki vsebuje polje “cas”
+	- doda v tabelo trenuten cas
+	- vsebino tabele izpise v HTML obliki
 
-TODO:
-# dodaj drop in shrani!!!
-preveri dns ker z dropom neha delovati
+### Postopek:
+
+Na official [repositoriju](https://hub.docker.com/r/_/cassandra/) oz [tu](https://github.com/docker-library/cassandra/tree/88f7b82386e788634f4a0f31711c92c268640df9/3.11) najdemo Dockerfile za specifično verzijo.
+Lokalno shranim obe datoteki: [Dockerfile](./docker/Dockerfile) in [docker-entrypoint.sh](./docker/docker-entrypoint.sh).
+Zaradi zagona bash skripte je potrebno dodati pot do skripte v PATH sistemsko spremenljivko.
+
+Izvršimo gradnjo docker slike in kontejnerja iz te slike:
+
+```shell
+sudo docker build .
+docker run --name cassandra-dev -d cassandra:3.11
+
+```
+
+### Plan rešitve:
+Žal sem bil primoran reševati naloge ponoči (tudi razvidno iz commitov), mi je zmanjkalo časa za implementacijo dokončne rešitve 5. naloge.
+Bi pa vseeno tu nakazal kako sem se stvari hotel lotiti:
+
+- kreirati še en Dockerfile z nginx in golang
+- kreirati docker-compose.yml s katerim bi definiral zagon vseh service-ov in portov
+- kreirati web server kot npr: https://www.sohamkamani.com/blog/2016/11/22/docker-server-busybox-golang/
+- s pomočjo klienta [gocql](https://github.com/gocql/gocql) realizirati vpise v db in branje celotne tabele z naslednjimi query-i:
+```shell
+CREATE KEYSPACE IF NOT EXISTS projekt1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+USE projekt1;
+CREATE TABLE IF NOT EXISTS test (cas timestamp,  PRIMARY KEY (cas));
+INSERT INTO test (cas) values (dateOf(now()));
+SELECT * FROM test
+```
+
+- implementirati zapis html tabele v smislu:
+```go
+var tmpl = `<tr><td>%s</td></tr>`
+fmt.Printf("<table>")
+names := []string{"john", "jim"}
+for _, v := range names {
+      fmt.Printf(tmpl, v)
+}
+fmt.Printf("</table>")
+```
+Glede na usmeritve bi še spremenil naslednje vrstice v datoteki "src/http/ngx_http_header_filter_module.ci":  
+```shell
+static char ngx_http_server_string[] = "Server: MyDomain.com" CRLF;
+static char ngx_http_server_full_string[] = "Server: MyDomain.com" CRLF;
+```
+[Vir](https://stackoverflow.com/questions/246227/how-do-you-change-the-server-header-returned-by-nginx?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa) rešitve.
+
+Za public free docker register bi uprabil: (https://hub.docker.com/)
+
+
+
