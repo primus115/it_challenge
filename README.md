@@ -192,8 +192,8 @@ docker run --name cassandra-dev -d cassandra:3.11
 ```
 
 ### Plan rešitve:
-Žal sem bil primoran reševati naloge ponoči (tudi razvidno iz commitov), mi je zmanjkalo časa za implementacijo dokončne rešitve 5. naloge.
-Bi pa vseeno tu nakazal kako sem se stvari hotel lotiti:
+Ker sem bil žal primoran reševati naloge ponoči, mi je zmanjkalo časa za implementacijo dokončne rešitve 5. naloge.
+Bom pa vseeno tu nakazal, kako sem se stvari hotel lotiti:
 
 - kreirati še en Dockerfile z nginx in golang
 - kreirati docker-compose.yml s katerim bi definiral zagon vseh service-ov in portov
