@@ -197,7 +197,7 @@ Bi pa vseeno tu nakazal kako sem se stvari hotel lotiti:
 
 - kreirati še en Dockerfile z nginx in golang
 - kreirati docker-compose.yml s katerim bi definiral zagon vseh service-ov in portov
-- kreirati web server kot npr: https://www.sohamkamani.com/blog/2016/11/22/docker-server-busybox-golang/
+- kreirati web server kot npr: https://www.sohamkamani.com/blog/2016/11/22/docker-server-busybox-golang/ (seveda na nginx+golang kontejnerju)
 - s pomočjo klienta [gocql](https://github.com/gocql/gocql) realizirati vpise v db in branje celotne tabele z naslednjimi query-i:
 ```shell
 CREATE KEYSPACE IF NOT EXISTS projekt1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
@@ -217,7 +217,7 @@ for _, v := range names {
 }
 fmt.Printf("</table>")
 ```
-Glede na usmeritve bi še spremenil naslednje vrstice v datoteki "src/http/ngx_http_header_filter_module.ci":  
+Glede na usmeritve za nginx, bi še spremenil naslednje vrstice v datoteki "src/http/ngx_http_header_filter_module.ci" in naredil compile sourca in .deb paket:  
 ```shell
 static char ngx_http_server_string[] = "Server: MyDomain.com" CRLF;
 static char ngx_http_server_full_string[] = "Server: MyDomain.com" CRLF;
